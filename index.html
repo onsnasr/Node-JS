@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>What Do You Want to Eat?</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700&family=Cairo:wght@400;600&display=swap">
+<style>
+/* Layout: one column of bright section cards on a deep-blue sky, chips you tap to pick */
+:root{
+  --bg:#e8f1ff; --card:#ffffff; --fg:#0d2347; --muted:#5b6f92;
+  --accent:#1f6fff; --accent2:#00b4d8; --chip:#eef4ff; --chipOn:#1f6fff; --chipOnFg:#fff;
+  --no:#ff5d73; --line:#cddcf7;
+  --display:"Baloo 2",system-ui,sans-serif; --body:"Nunito",system-ui,sans-serif; --ar:"Cairo","Noto Sans Arabic",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#081428;--card:#0f2140;--fg:#e9f1ff;--muted:#9db1d6;--accent:#4d8fff;--accent2:#22c3e6;--chip:#16305a;--chipOn:#4d8fff;--chipOnFg:#fff;--no:#ff7387;--line:#1f3a66;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#081428;--card:#0f2140;--fg:#e9f1ff;--muted:#9db1d6;--accent:#4d8fff;--accent2:#22c3e6;--chip:#16305a;--chipOn:#4d8fff;--chipOnFg:#fff;--no:#ff7387;--line:#1f3a66;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 60px}
+.wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.hero{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-radius:24px;padding:26px 22px;text-align:center}
+.hero h1{font-family:var(--display);font-size:2.2rem;line-height:1.1;margin:0;text-wrap:balance}
+.hero p{margin:8px 0 0;font-weight:600}
+.ar{font-family:var(--ar);direction:rtl;unicode-bidi:isolate;color:var(--muted);font-size:.9em}
+.hero .ar{color:#e6f3ff}
+.card{background:var(--card);border-radius:20px;padding:20px;border:2px solid var(--line)}
+.card h2{font-family:var(--display);font-size:1.6rem;margin:0 0 4px}
+.q{margin-top:16px}
+.q h3{font-size:1.05rem;margin:0 0 8px;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:2px solid transparent;background:var(--chip);color:var(--fg);border-radius:999px;padding:8px 14px;font:inherit;font-weight:600;cursor:pointer;display:flex;gap:6px;align-items:center;transition:transform .1s}
+.chip:active{transform:scale(.95)}
+.chip.on{background:var(--chipOn);color:var(--chipOnFg)}
+.chip.on .ar{color:#dbe8ff}
+.chip.hate.on{background:var(--no)}
+.chip:focus-visible,textarea:focus-visible,button:focus-visible{outline:3px solid var(--accent2);outline-offset:2px}
+textarea{width:100%;box-sizing:border-box;border:2px solid var(--line);background:var(--bg);color:var(--fg);border-radius:14px;padding:10px;font:inherit;min-height:60px;resize:vertical}
+.other{margin-top:10px}
+.other label{font-size:.9rem;font-weight:700;display:block;margin-bottom:4px}
+.btn:disabled{opacity:.7}
+.btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:0;border-radius:16px;padding:16px;font-family:var(--display);font-size:1.3rem;cursor:pointer;width:100%}
+#out{white-space:pre-wrap;background:var(--bg);border-radius:14px;padding:14px;border:2px dashed var(--line);font-size:.95rem}
+.note{color:var(--muted);font-size:.9rem;margin:8px 0}
+@media (prefers-reduced-motion:reduce){.chip{transition:none}}
+</style>
+</head><body>
+<div class="wrap">
+  <header class="hero">
+    <h1>🍽️ Your Menu, Your Rules 😎</h1>
+    <p>Tap everything you like. Write anything we forgot. We'll cook it!</p>
+    <p class="ar">اختار كل شي تحبو، واكتب اللي نسيناه. ماما باش تطيبهولك ❤️</p>
+  </header>
+  <div id="form"></div>
+  <section class="card">
+    <h2>✅ Done? <span class="ar">كمّلت؟</span></h2>
+    <p class="note">Press Submit and your answers are sent 📩 <span class="ar">(اضغط وتتبعث الأجوبة)</span></p>
+    <button class="btn" id="go">Submit 🚀</button>
+    <p class="note" id="sent"></p>
+  </section>
+</div>
+
+<script>
+const D=[
+ {t:"☀️ Breakfast",a:"فطور الصباح",q:[
+  ["☕ What do you want to drink?","شنوّة تحب تشرب؟",[["☕ Normal coffee","قهوة عادية"],["🍫 Coffee with Choco","قهوة بالشوكو"],["🥛 Chocolate milk","حليب بالشوكولا"],["🥛 Plain milk","حليب"],["🍵 Tea","تاي"],["🧃 Juice","عصير"]]],
+  ["🥣 Cereals & bowls","حبوب الفطور",[["🥣 Granola","قرانولا"],["🌾 Oats","شوفان"],["🌽 Corn flakes","كورن فليكس"],["🍫 Chocolate cereals","حبوب بالشوكولا"],["🍯 Honey cereals","حبوب بالعسل"],["🍌 Banana on top","بالبنان"]]],
+  ["🍞 On bread / toast","على الخبز / التوست",[["🍞 Toast","توست"],["🍫 Chocolate spread","شوكولا للدهن"],["🧀 Cheese","فرماج"],["🧀 Spreading cheese","فرماج للدهن"],["🍓 Jam","معجون"],["🍯 Honey","عسل"],["🥓 Jambon","جمبون / شرائح لحم"],["🧈 Butter","زبدة"],["🫒 Olive oil & zaatar","زيت زيتون وزعتر"],["🥜 Peanut butter","زبدة الكاكاوية"]]],
+  ["🍳 Eggs","العظم",[["🍳 Fried egg","عظم مقلي"],["🥚 Boiled egg","عظم مسلوق"],["🍳 Omelette","عجّة / أومليت"],["🍳 Scrambled","عظم مخلوط"]]],
+  ["🥐 Something sweet","حاجة حلوة",[["🥐 Croissant","كرواسون"],["🥞 Pancakes / crêpes","كريب"],["🍰 Cake","كيكة"],["🍩 Bambalouni","بمبالوني"]]]]},
+ {t:"🍝 Lunch",a:"الغداء",q:[
+  ["🍗 Chicken & meat","الدجاج واللحم",[["🍗 Chicken wings","أجنحة دجاج"],["🍗 Roast chicken","دجاج في الفور"],["🍔 Burger","برڨر"],["🥙 Escalope","إسكالوب"],["🌭 Merguez","مرقاز"],["🍢 Grilled meat","لحم مشوي"],["🐟 Fish","حوت"]]],
+  ["🍝 Pasta & rice","المقرونة والروز",[["🍝 Red pasta","مقرونة حمراء"],["🍝 White / cream pasta","مقرونة بيضاء"],["🍚 Any rice","روز"],["🍚 Rouz Jerbi","روز جربي"],["🍕 Pizza","بيتزا"],["🍝 Lasagna","لازانيا"]]],
+  ["🇹🇳 Tunisian dishes","الماكلة التونسية",[["🍲 Couscous","كسكسي"],["🫘 Marqa Loubia","مرقة لوبيا"],["🫛 Marqa Jelbana","مرقة جلبانة"],["🥬 Mloukhia","ملوخية"],["🍳 Ojja","عجّة"],["🥘 Kafteji","كفتاجي"],["🥣 Lablabi","لبلابي"],["🥟 Brik","بريك"],["🥧 Tajine","طاجين"],["🍲 Chorba","شربة"],["🍅 Chakchouka","شكشوكة"],["🥘 Kammounia","كمونية"],["🍝 Nwasser / Rechta","نواصر / رشتة"],["🥘 Mosli","مصلي"]]]]},
+ {t:"🌙 Dinner",a:"العشاء",q:[
+  ["🌙 Light or heavy?","خفيف ولا ثقيل؟",[["🥪 Sandwich","كسكروت"],["🥗 Salad","سلاطة"],["🍲 Soup / chorba","شربة"],["🍳 Eggs","عظم"],["🍕 Pizza","بيتزا"],["🍝 Pasta","مقرونة"],["🍽️ Same as lunch","كيف الغداء"],["🥛 Just milk & something","حليب وحاجة خفيفة"]]]]},
+ {t:"🍿 Snacks",a:"الحاجات الخفيفة",q:[
+  ["🍿 Snack time","وقت اللمجة",[["🥜 Nuts","فواكه جافة"],["🍿 Popcorn","بوب كورن"],["🍪 Biscuits","بسكويت"],["🍫 Chocolate","شوكولا"],["🥛 Yogurt","ياوورت"],["🥨 Chips","شيبس"],["🌯 Mlewi / Chapati","ملاوي / شباتي"],["🥤 Smoothie","سموذي"]]],
+  ["🧃 Juice","العصير",[["🍊 Orange","برتقال"],["🍓 Strawberry","فراولو"],["🍋 Citronnade","سيتروناد"],["🍌 Banana milk","حليب بالبنان"],["🍉 Watermelon","دلاع"],["🥤 Mixed fruits","عصير غلال"]]]]},
+ {t:"🍎 Fruits",a:"الغلال",love:true,list:[["🍎 Apple","تفاح"],["🍌 Banana","بنان"],["🍊 Orange","برتقال"],["🍓 Strawberry","فراولو"],["🍇 Grapes","عنب"],["🍉 Watermelon","دلاع"],["🍈 Melon","بطيخ"],["🍑 Peach","خوخ"],["🍐 Pear","إنجاص"],["🫐 Dates","تمر"],["🥝 Kiwi","كيوي"],["🍍 Pineapple","أناناس"],["🥭 Mango","مانڨا"],["🍒 Cherries","حب الملوك"]]},
+ {t:"🥕 Vegetables",a:"الخضرة",love:true,list:[["🥕 Carrot","سفنارية"],["🍅 Tomato","طماطم"],["🥒 Cucumber","فقوس"],["🥔 Potato","بطاطا"],["🫑 Pepper","فلفل"],["🧅 Onion","بصل"],["🥦 Broccoli","بروكلي"],["🥬 Lettuce","سلاطة خضراء"],["🍆 Eggplant","بادنجان"],["🎃 Squash","قرع"],["🫛 Peas","جلبانة"],["🌽 Corn","قطانية / ذرة"],["🍄 Mushrooms","فقاع"],["🥗 Zucchini","قرعة"]]}
+];
+const sel={},txt={};let n=0;
+const chip=(k,[e,a],cls="")=>`<button type="button" class="chip ${cls}" data-k="${k}" data-v="${e}">${e} <span class="ar">(${a})</span></button>`;
+const other=(k,lab="✍️ Something else? Write it! ",ar="حاجة أخرى؟ اكتبها")=>`<div class="other"><label for="o${k}">${lab}<span class="ar">(${ar})</span></label><textarea id="o${k}" data-o="${k}"></textarea></div>`;
+let h="";
+D.forEach(s=>{
+ h+=`<section class="card"><h2>${s.t} <span class="ar">${s.a}</span></h2>`;
+ if(s.love){
+  const k1=s.t+" — LOVE ❤️",k2=s.t+" — HATE 🤢";
+  h+=`<div class="q"><h3>❤️ Which ones do you LIKE? <span class="ar">(شنوّة تحب؟)</span></h3><div class="chips">${s.list.map(i=>chip(k1,i)).join("")}</div></div>`;
+  h+=`<div class="q"><h3>🤢 Which ones do you HATE? <span class="ar">(شنوّة ما تحبش؟)</span></h3><div class="chips">${s.list.map(i=>chip(k2,i,"hate")).join("")}</div></div>`;
+  h+=other(s.t);
+ }else{
+  s.q.forEach(([q,a,opts])=>{const k=s.t+" › "+q;h+=`<div class="q"><h3>${q} <span class="ar">(${a})</span></h3><div class="chips">${opts.map(i=>chip(k,i)).join("")}</div>${other("x"+(n++)+"|"+k)}</div>`});
+  h+=other(s.t,"💡 Your own ideas for "+s.t.slice(3)+" ","أفكارك الخاصة");
+ }
+ h+=`</section>`;
+});
+h+=`<section class="card"><h2>💬 Anything else? <span class="ar">حاجة أخرى؟</span></h2>${other("final","Tell mom anything about food ","قول لماما أي حاجة على الماكلة")}</section>`;
+document.getElementById("form").innerHTML=h;
+document.addEventListener("click",e=>{const c=e.target.closest(".chip");if(!c)return;c.classList.toggle("on");const k=c.dataset.k;sel[k]=sel[k]||new Set();c.classList.contains("on")?sel[k].add(c.dataset.v):sel[k].delete(c.dataset.v)});
+document.getElementById("go").onclick=async()=>{
+ const btn=document.getElementById("go"),msg=document.getElementById("sent");
+ let o="";
+ for(const k in sel) if(sel[k].size) o+=`${k}:\n  • ${[...sel[k]].join("\n  • ")}\n\n`;
+ document.querySelectorAll("textarea").forEach(t=>{if(t.value.trim()){const k=t.dataset.o.replace(/^x\d+\|/,"");o+=`✍️ ${k}: ${t.value.trim()}\n\n`}});
+ if(!o){msg.textContent="Pick at least one thing first 😅 (اختار حاجة على الأقل)";return}
+ btn.disabled=true;btn.textContent="Sending... ⏳";
+ try{
+  const r=await fetch("https://formsubmit.co/ajax/onsxxnasr@gmail.com",{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify({_subject:"🍽️ New food answers!",_template:"box",_captcha:"false",Answers:o})});
+  if(!r.ok)throw 0;
+  btn.textContent="Sent ✅";msg.textContent="Thank you! Your answers were sent 🎉 (شكرا! الأجوبة تبعثت)";
+ }catch(e){btn.disabled=false;btn.textContent="Submit 🚀";msg.textContent="Didn't send. Check your internet and press Submit again. (عاود اضغط)"}
+};
+</script>
+
+</body></html>
