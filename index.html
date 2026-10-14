@@ -107,7 +107,7 @@ document.getElementById("go").onclick=async()=>{
  btn.disabled=true;btn.textContent="Sending... ⏳";
  try{
   const r=await fetch("https://formsubmit.co/ajax/a1b897d619a9e52ddbc9acd587ee0fb2",{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify({_subject:"🍽️ Food answers from "+who,Name:who,_template:"box",_captcha:"false",Answers:o})});
-  if(!r.ok)throw 0;
+  const j=await r.json().catch(()=>({}));if(!r.ok||String(j.success)!=="true")throw 0;
   btn.textContent="Sent ✅";msg.textContent="Thank you! Your answers were sent 🎉 (شكرا! الأجوبة تبعثت)";
  }catch(e){btn.disabled=false;btn.textContent="Submit 🚀";msg.textContent="Didn't send. Check your internet and press Submit again. (عاود اضغط)"}
 };
